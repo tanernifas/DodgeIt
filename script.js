@@ -216,7 +216,7 @@ var entities = [
 ];
 
 //коэффициент размера персонажа
-var scale = 1;
+var scale = 0.5;
 //коэффициент размера врагов
 var entityScale = 0.5;
 //скорость
@@ -364,6 +364,8 @@ function checkMove(e) {
 function play() {
     clear();
 
+    resize();
+
     //запустим игру
     startGame = true;
 
@@ -401,6 +403,8 @@ function play() {
 
         cvs.addEventListener('mousedown', checkPlayButtonDown, false);
         cvs.addEventListener('mouseup', checkPlayButtonUp, false);
+        cvs.addEventListener('touchstart', checkPlayButtonDown, false);
+        cvs.addEventListener('touchend', checkPlayButtonUp, false);
     }
 
     timer = setInterval(update, UPDATE_TIME);
@@ -460,6 +464,7 @@ function stop() {
     startGame = false;
 
     if (death) {
+        clearCanvas()
         ctx.font = "72px serif";
         ctx.strokeText("HAPPY BIRTHDAY", cvs.width / 2, cvs.height / 2);
     }
