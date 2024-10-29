@@ -189,8 +189,12 @@ var startGame = false;
 var health = 5;
 //очки
 var score = 0;
+//очки для смены уровня
+var levelScore = 0;
 //смерть
 var death = false;
+//победа
+var win = false;
 
 //получение холста
 var cvs = document.getElementById("canvas");
@@ -464,8 +468,14 @@ function stop() {
     startGame = false;
 
     if (death) {
-        clearCanvas();
         ctx.font = "32px serif";
+	ctx.textAlign = "center";
+        ctx.strokeText("DEATH", cvs.width / 2, cvs.height / 2);
+    }
+
+     if (win) {
+        ctx.font = "32px serif";
+	ctx.textAlign = "center";
         ctx.strokeText("HAPPY BIRTHDAY", cvs.width / 2, cvs.height / 2);
     }
 }
@@ -541,6 +551,17 @@ function update() {
 
     move();
 
+        //экран смерти
+    if (health <= 0) {
+       death = true;
+       stop(); // Перезагрузка страницы
+    }
+
+    if (score >= 50) {
+       win = true;
+       stop();
+    }
+
     //score++;
 
     /*if (player.IsDead())
@@ -570,18 +591,16 @@ function draw() {
             && player.y + (player.image.height * scale) >= entities[i].y) {
             //health--;
             score++;
-            console.log(player.y + " " + entities[i].x + " " + (entities[i].image.height * entityScale));
+	    levelScore++;
+	    if (levelScore >= 10) {
+		    levelScore = 0;
+		    backgroundSpeed += 0.5;
+	    }
 
             entities[i].x = cvs.width;
             entities[i].y =  Math.floor(Math.random() * (cvs.height - (entities[i].image.height * entityScale)));
         }
     }
-
-    //экран смерти
-   if (health <= 0) {
-       death = true;
-       stop(); // Перезагрузка страницы
-   }
 
     drawHealth();
 
@@ -669,7 +688,7 @@ function drawEntity(entity, x, y) {
 function drawHealth() {
     if (health > 0) {
         ctx.font = "32px serif";
-        ctx.strokeText("HEALTH " + health, 120, 50);
+        ctx.strokeText("HEALTH " + health, cvs.width * 0.15, 50);
     }
 }
 
@@ -679,7 +698,7 @@ function drawHealth() {
 function drawScore() {
     if (health > 0) {
         ctx.font = "32px serif";
-        ctx.strokeText("SCORE " + score, cvs.width * 0.7, 50);
+        ctx.strokeText("SCORE " + score, cvs.width * 0.85, 50);
     }
 }
 
