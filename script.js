@@ -216,13 +216,13 @@ var entities = [
 ];
 
 //коэффициент размера персонажа
-var scale = 0.5;
+var scale = 1;
 //коэффициент размера врагов
 var entityScale = 0.5;
 //скорость
 var speed = 5;
 //скорость фона
-var backgroundSpeed = 3;
+var backgroundSpeed = 4;
 //скорость подъема
 var upSpeed = 3;
 //коэффициент гравитации
@@ -464,8 +464,8 @@ function stop() {
     startGame = false;
 
     if (death) {
-        clearCanvas()
-        ctx.font = "72px serif";
+        clearCanvas();
+        ctx.font = "32px serif";
         ctx.strokeText("HAPPY BIRTHDAY", cvs.width / 2, cvs.height / 2);
     }
 }
@@ -541,7 +541,7 @@ function update() {
 
     move();
 
-    score++;
+    //score++;
 
     /*if (player.IsDead())
         Stop();*/
@@ -564,28 +564,30 @@ function draw() {
         drawEntity(entities[i], cvs.width, entities[i].y);
 
         // Отслеживание прикосновений
-        if (player.x + player.image.width >= entities[i].x
-            && player.x <= entities[i].x + entities[i].image.width
-            && (player.y <= entities[i].y + entities[i].image.height
-            || player.y + player.image.height >= entities[i].y + entities.height)) {
-            health--;
+        if (player.x + (player.image.width * scale) >= entities[i].x
+            && player.x <= entities[i].x + (entities[i].image.width  * entityScale)
+            && player.y <= entities[i].y + (entities[i].image.height * entityScale)
+            && player.y + (player.image.height * scale) >= entities[i].y) {
+            //health--;
+            score++;
+            console.log(player.y + " " + entities[i].x + " " + (entities[i].image.height * entityScale));
 
             entities[i].x = cvs.width;
             entities[i].y =  Math.floor(Math.random() * (cvs.height - (entities[i].image.height * entityScale)));
         }
-
-        //экран смерти
-       if (health <= 0) {
-           death = true;
-           stop(); // Перезагрузка страницы
-       }
     }
+
+    //экран смерти
+   if (health <= 0) {
+       death = true;
+       stop(); // Перезагрузка страницы
+   }
 
     drawHealth();
 
     drawScore();
 
-    drawGameButtons();
+    //drawGameButtons();
 }
 
 /**
@@ -657,6 +659,7 @@ function drawEntity(entity, x, y) {
     if (entity.x <= -entity.image.width * entityScale) {
         entity.x = cvs.width;
         entity.y =  Math.floor(Math.random() * (cvs.height - (entity.image.height * entityScale)));
+        health--;
     }
 }
 
