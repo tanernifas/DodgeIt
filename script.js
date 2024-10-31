@@ -1,7 +1,3 @@
-//info
-//https://developer.mozilla.org/ru/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript
-//https://itproger.com/news/igra-na-chistom-javascript-za-20-minut
-
 /**
  * Фон
  */
@@ -15,10 +11,10 @@ class Background {
     }
 
     /**
-     * Обновляем слой на основе другого слоя
+     * Обновляем фон на основе другого фон
      */
     update(background) {
-        //при обновлении изображение смещается
+        //при обновлении изображение смещаем на скорость
         this.x -= backgroundSpeed;
 
         //если изображение ушло за край холста, то меняем положение
@@ -33,9 +29,6 @@ class Background {
  * Персонаж
  */
 class Player {
-    //dead = false;
-    //health = 3;
-
     constructor(imageUrl, x, y) {
         this.x = x;
         this.y = y;
@@ -60,7 +53,7 @@ class Player {
             this.y += d; //смещение
 
             //если при смещении объект выходит за края холста, то изменения откатываются
-            if (this.y + this.image.height * scale > canvas.height) {
+            if (this.y + this.image.height * scale > cvs.height) {
                 this.y -= d;
             }
 
@@ -70,7 +63,7 @@ class Player {
         } else {//перемещение по оси x
             this.x += d;
 
-            if (this.x + this.image.width * scale > canvas.width) {
+            if (this.x + this.image.width * scale > cvs.width) {
                 this.x -= d;
             }
 
@@ -79,14 +72,6 @@ class Player {
             }
         }
     }
-
-    /*Hit() {
-        health--;
-    }
-
-    get IsDead() {
-        return health <= 0;
-    }*/
 }
 
 /**
@@ -152,7 +137,7 @@ class PartMenu {
 }
 
 /**
- * Кнопка
+ * Кнопка для управления
  */
 class GameButton {
     constructor(text, rect) {
@@ -160,7 +145,7 @@ class GameButton {
         this.rect = rect;
     }
 
-        /**
+    /**
      * Проверка на нажатие
      */
     move(mousePosX, mousePosY) {
@@ -233,7 +218,7 @@ var upSpeed = 3;
 var gravity = 0.5;
 
 //использовать кнопки графического интерфейса для управления
-var useGuiButtons = true;
+var useGuiButtons = false;
 
 var leftPress = false;
 var rightPress = false;
@@ -276,7 +261,7 @@ function createMenu() {
     startMenuXPos = cvs.width / 2;
     //позиция компонента по Y
     startMenuYPos = cvs.height / (3 * 2);
-
+    //положение текста по x
     ctx.textAlign = "center";
 
     playMenu = new PartMenu("Play", startMenuXPos, getStartMenuYPos(), {
@@ -300,6 +285,7 @@ function createMenu() {
         h: cvs.height / (3 * 2)
     }, fontSize + "px serif");
 
+    //изначальная отрисовка меню
     playMenu.strokeText();
     recordsMenu.strokeText();
     shareMenu.strokeText();
@@ -405,8 +391,10 @@ function play() {
             h: buttonSize
         });
 
+	//для мыши    
         cvs.addEventListener('mousedown', checkPlayButtonDown, false);
         cvs.addEventListener('mouseup', checkPlayButtonUp, false);
+	//для экрана
         cvs.addEventListener('touchstart', checkPlayButtonDown, false);
         cvs.addEventListener('touchend', checkPlayButtonUp, false);
     }
@@ -439,11 +427,15 @@ function share() {
  */
 function clear() {
     //очистим экран
-        clearCanvas();
+    clearCanvas();
 
-    //удалим листенеры на нажатие мыши
-    canvas.removeEventListener('click', checkClick, false);
-    canvas.removeEventListener('mousemove', checkMove, false);
+    //удалим листенеры
+    cvs.removeEventListener('click', checkClick, false);
+    cvs.removeEventListener('mousemove', checkMove, false);
+    cvs.addEventListener('mousedown', checkPlayButtonDown, false);
+    cvs.addEventListener('mouseup', checkPlayButtonUp, false);
+    cvs.addEventListener('touchstart', checkPlayButtonDown, false);
+    cvs.addEventListener('touchend', checkPlayButtonUp, false);
 }
 
 /**
@@ -451,7 +443,7 @@ function clear() {
  */
 function clearCanvas() {
     //очистим экран
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
 }
 
 /**
@@ -561,11 +553,6 @@ function update() {
        win = true;
        stop();
     }
-
-    //score++;
-
-    /*if (player.IsDead())
-        Stop();*/
 }
 
 /**
@@ -606,7 +593,8 @@ function draw() {
 
     drawScore();
 
-    //drawGameButtons();
+    if (useGuiButtons)
+    	drawGameButtons();
 }
 
 /**
