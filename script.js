@@ -1,3 +1,7 @@
+////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////CLASSES//////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
 /**
  * Фон
  */
@@ -168,6 +172,9 @@ class GameButton {
 
 //частота обновления
 UPDATE_TIME = 1000 / 60;
+//таймер
+var timer = null;
+
 //запущена игра
 var startGame = false;
 //жизни
@@ -176,6 +183,8 @@ var health = 5;
 var score = 0;
 //очки для смены уровня
 var levelScore = 0;
+//количество очков для окончания игры
+var scoreToWin = 60;
 //смерть
 var death = false;
 //победа
@@ -185,8 +194,6 @@ var win = false;
 var cvs = document.getElementById("canvas");
 //получение контекста
 var ctx = cvs.getContext("2d");
-//таймер
-var timer = null;
 
 //подстраиваем холст под размер экрана при запуске
 //делаем это перед инициализацией объектов сцены
@@ -206,28 +213,27 @@ var entities = [
 
 //коэффициент размера персонажа
 var scale = 1;
+//скорость персонажа
+var speed = 5;
+//скорость подъема персонажа
+var upSpeed = 3;
+
 //коэффициент размера врагов
 var entityScale = 0.5;
-//скорость
-var speed = 5;
-//скорость фона
+//скорость фона/ стоячих врагов
 var backgroundSpeed = 4;
-//скорость подъема
-var upSpeed = 3;
-//коэффициент гравитации
-var gravity = 0.5;
+
 
 //использовать кнопки графического интерфейса для управления
 var useGuiButtons = false;
 
+//переменные для определения нажатых кнопок
 var leftPress = false;
 var rightPress = false;
 var upPress = false;
 var downPress = false;
 
-//а также при изменении экрана
 window.addEventListener("resize", resize);
-
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
 
@@ -549,7 +555,7 @@ function update() {
        stop(); // Перезагрузка страницы
     }
 
-    if (score >= 50) {
+    if (score >= scoreToWin) {
        win = true;
        stop();
     }
@@ -576,7 +582,7 @@ function draw() {
             && player.x <= entities[i].x + (entities[i].image.width  * entityScale)
             && player.y <= entities[i].y + (entities[i].image.height * entityScale)
             && player.y + (player.image.height * scale) >= entities[i].y) {
-            //health--;
+
             score++;
 	    levelScore++;
 	    if (levelScore >= 10) {
