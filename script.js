@@ -184,7 +184,7 @@ var score = 0;
 //очки для смены уровня
 var levelScore = 0;
 //количество очков для окончания игры
-var scoreToWin = 60;
+var scoreToWin = 75;
 //смерть
 var death = false;
 //победа
@@ -247,9 +247,12 @@ createMenu();
  * Создание меню
  */
 function createMenu() {
+    //количество кнопок меню 
+    var menuButtonsCount = 3;
+	
     //итеративная функция распределения компонентов
     function getStartMenuYPos() {
-        startMenuYPos += cvs.height / (3 * 2);
+        startMenuYPos += cvs.height / (menuButtonsCount * 2);
         return startMenuYPos;
     }
 
@@ -266,29 +269,29 @@ function createMenu() {
     //позиция компонента по X
     startMenuXPos = cvs.width / 2;
     //позиция компонента по Y
-    startMenuYPos = cvs.height / (3 * 2);
+    startMenuYPos = cvs.height / (menuButtonsCount * 2);
     //положение текста по x
     ctx.textAlign = "center";
 
     playMenu = new PartMenu("Play", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width / 4) / 2),
+        x: startMenuXPos - ((cvs.width / menuButtonsCount + 1) / 2),
         y: startMenuYPos - fontSize,
-        w: cvs.width / 4,
-        h: cvs.height / (3 * 2)
+        w: cvs.width / menuButtonsCount + 1,
+        h: cvs.height / (menuButtonsCount * 2)
     }, fontSize + "px serif");
 
     recordsMenu = new PartMenu("Records", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width / 4) / 2),
+        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1)) / 2),
         y: startMenuYPos - fontSize,
-        w: cvs.width / 4,
-        h: cvs.height / (3 * 2)
+        w: cvs.width / menuButtonsCount + 1,
+        h: cvs.height / (menuButtonsCount * 2)
     }, fontSize + "px serif");
 
     shareMenu = new PartMenu("Share", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width / 4) / 2),
+        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1)) / 2),
         y: startMenuYPos - fontSize,
-        w: cvs.width / 4,
-        h: cvs.height / (3 * 2)
+        w: cvs.width / menuButtonsCount + 1,
+        h: cvs.height / (menuButtonsCount * 2)
     }, fontSize + "px serif");
 
     //изначальная отрисовка меню
@@ -438,10 +441,12 @@ function clear() {
     //удалим листенеры
     cvs.removeEventListener('click', checkClick, false);
     cvs.removeEventListener('mousemove', checkMove, false);
-    cvs.addEventListener('mousedown', checkPlayButtonDown, false);
-    cvs.addEventListener('mouseup', checkPlayButtonUp, false);
-    cvs.addEventListener('touchstart', checkPlayButtonDown, false);
-    cvs.addEventListener('touchend', checkPlayButtonUp, false);
+    if (useGuiButtons) {
+    	cvs.addEventListener('mousedown', checkPlayButtonDown, false);
+    	cvs.addEventListener('mouseup', checkPlayButtonUp, false);
+    	cvs.addEventListener('touchstart', checkPlayButtonDown, false);
+    	cvs.addEventListener('touchend', checkPlayButtonUp, false);
+    }
 }
 
 /**
