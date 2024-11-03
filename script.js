@@ -1,237 +1,77 @@
-////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////CLASSES//////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-/**
- * Фон
- */
-class Background {
-    constructor(imageUrl, shift) {
-        this.x = shift;
-        this.y = 0;
-
-        this.image = new Image();
-        this.image.src = imageUrl;
-    }
-
-    /**
-     * Обновляем фон на основе другого фон
-     */
-    update(background) {
-        //при обновлении изображение смещаем на скорость
-        this.x -= backgroundSpeed;
-
-        //если изображение ушло за край холста, то меняем положение
-        if (this.x < -cvs.width) {
-            //новое положение указывается с учётом второго фона
-            this.x = background.x + cvs.width - backgroundSpeed;
-        }
-    }
-}
-
-/**
- * Персонаж
- */
-class Player {
-    constructor(imageUrl, x, y) {
-        this.x = x;
-        this.y = y;
-
-        this.image = new Image();
-        this.image.src = imageUrl;
-    }
-
-    /**
-     * Обновляем местоположение по x
-     */
-    update() {
-        this.x += speed;
-    }
-
-    /**
-     * Обновляем на основе нажатых клавиш
-     */
-    move(v, d) {
-        //перемещение по оси y
-        if(v == "y") {
-            this.y += d; //смещение
-
-            //если при смещении объект выходит за края холста, то изменения откатываются
-            if (this.y + this.image.height * scale > cvs.height) {
-                this.y -= d;
-            }
-
-            if (this.y < 0) {
-                this.y = 0;
-            }
-        } else {//перемещение по оси x
-            this.x += d;
-
-            if (this.x + this.image.width * scale > cvs.width) {
-                this.x -= d;
-            }
-
-            if(this.x < 0) {
-                this.x = 0;
-            }
-        }
-    }
-}
-
-/**
- * Противник
- */
-class Entity {
-    constructor(imageUrl, x, y) {
-        this.x = x;
-        this.y = y;
-
-        this.image = new Image();
-        this.image.src = imageUrl;
-    }
-}
-
-/**
- * Объект меню
- */
-class PartMenu {
-    constructor(text, x, y, rect, font) {
-        this.text = text;
-        this.x = x;
-        this.y = y;
-        this.rect = rect;
-        this.font = font;
-    }
-
-    /**
-     * Написать строку
-     */
-    strokeText() {
-        ctx.font = this.font;
-        ctx.strokeText(this.text, this.x, this.y);
-    }
-
-    /**
-     * Написать залитую строку
-     */
-    fillText() {
-        ctx.font = this.font;
-        ctx.fillText(this.text, this.x, this.y);
-    }
-
-    /**
-     * Проверка на нажатие/наведение
-     */
-    move(mousePosX, mousePosY) {
-        if (mousePosX >= this.rect.x && mousePosX <= this.rect.x + this.rect.w &&
-            mousePosY >= this.rect.y && mousePosY <= this.rect.y + this.rect.h) {
-            return true;
-        }
-    }
-
-    /**
-     * Проверка на уход
-     */
-    over(mousePosX, mousePosY) {
-        if (mousePosX >= this.rect.x && mousePosX <= this.rect.x + this.rect.w &&
-            mousePosY >= this.rect.y && mousePosY <= this.rect.y + this.rect.h) {
-            return true;
-        }
-    }
-}
-
-/**
- * Кнопка для управления
- */
-class GameButton {
-    constructor(text, rect) {
-        this.text = text;
-        this.rect = rect;
-    }
-
-    /**
-     * Проверка на нажатие
-     */
-    move(mousePosX, mousePosY) {
-        if (mousePosX >= this.rect.x && mousePosX <= this.rect.x + this.rect.w &&
-            mousePosY >= this.rect.y && mousePosY <= this.rect.y + this.rect.h) {
-            return true;
-        }
-    }
-
-    /**
-     * Проверка на уход
-     */
-    over(mousePosX, mousePosY) {
-        if (mousePosX >= this.rect.x && mousePosX <= this.rect.x + this.rect.w &&
-            mousePosY >= this.rect.y && mousePosY <= this.rect.y + this.rect.h) {
-            return true;
-        }
-    }
-}
-
 //частота обновления
 UPDATE_TIME = 1000 / 60;
 //таймер
-var timer = null;
+let timer = null;
 
 //запущена игра
-var startGame = false;
+let startGame = false;
 //жизни
-var health = 5;
+let health = 5;
 //очки
-var score = 0;
+let score = 0;
 //очки для смены уровня
-var levelScore = 0;
+let levelScore = 0;
 //количество очков для окончания игры
-var scoreToWin = 75;
+const scoreToWin = 75;
 //смерть
-var death = false;
+let death = false;
 //победа
-var win = false;
+let win = false;
 
 //получение холста
-var cvs = document.getElementById("canvas");
+const cvs = document.getElementById("canvas");
 //получение контекста
-var ctx = cvs.getContext("2d");
+const ctx = cvs.getContext("2d");
 
 //подстраиваем холст под размер экрана при запуске
 //делаем это перед инициализацией объектов сцены
 resize();
 
 //массив с фонами
-var backgrounds = [
-    new Background("background.png", 0),
-    new Background("background.png", cvs.width)
+const backgrounds = [
+    new Background("src/sprites/background.png", 0),
+    new Background("src/sprites/background.png", cvs.width)
 ];
 //игрок
-var player = new Player("car.png", cvs.width / 2, cvs.height / 2, true);
+const player = new Player("src/sprites/car.png", cvs.width / 2, cvs.height / 2, true);
 //враги
-var entities = [
-    new Entity("entity.png", cvs.width, 0)
+const entities = [
+    new Entity("src/sprites/entity.png", cvs.width, 0)
 ];
 
 //коэффициент размера персонажа
-var scale = 1;
+const scale = 1;
 //скорость персонажа
-var speed = 5;
+const speed = 5;
 //скорость подъема персонажа
-var upSpeed = 3;
+const upSpeed = 3;
 
 //коэффициент размера врагов
-var entityScale = 0.5;
+const entityScale = 0.5;
 //скорость фона/ стоячих врагов
-var backgroundSpeed = 4;
-
+let backgroundSpeed = 4;
 
 //использовать кнопки графического интерфейса для управления
-var useGuiButtons = false;
+const useGuiButtons = false;
+
+//меню
+let playMenu;
+let recordsMenu;
+let shareMenu;
+
+//ui-кнопки
+let rectXPos;
+let rectYPos;
+let upButton;
+let downButton;
+let leftButton;
+let rightButton;
 
 //переменные для определения нажатых кнопок
-var leftPress = false;
-var rightPress = false;
-var upPress = false;
-var downPress = false;
+let leftPress = false;
+let rightPress = false;
+let upPress = false;
+let downPress = false;
 
 window.addEventListener("resize", resize);
 window.addEventListener("keydown", keyDownHandler, false);
@@ -248,28 +88,29 @@ createMenu();
  */
 function createMenu() {
     //количество кнопок меню 
-    var menuButtonsCount = 3;
-	
-    //итеративная функция распределения компонентов
-    function getStartMenuYPos() {
-        startMenuYPos += cvs.height / (menuButtonsCount * 2);
-        return startMenuYPos;
-    }
+    const menuButtonsCount = 3;
 
     //запустим игру
     startGame = false;
 
     //размер шрифта
-    var fontSize = 48;
+    const fontSize = 48;
     ctx.font = fontSize + "px serif";
 
     //актуализация размеров экрана
     resize();
 
     //позиция компонента по X
-    startMenuXPos = cvs.width / 2;
+    let startMenuXPos = cvs.width / 2;
     //позиция компонента по Y
-    startMenuYPos = cvs.height / (menuButtonsCount * 2);
+    let startMenuYPos = cvs.height / (menuButtonsCount * 2);
+
+    //итеративная функция распределения компонентов
+    function getStartMenuYPos() {
+        startMenuYPos += cvs.height / (menuButtonsCount * 2);
+        return startMenuYPos;
+    }
+
     //положение текста по x
     ctx.textAlign = "center";
 
@@ -281,14 +122,14 @@ function createMenu() {
     }, fontSize + "px serif");
 
     recordsMenu = new PartMenu("Records", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1) / 2),
+        x: startMenuXPos - ((cvs.width / menuButtonsCount + 1) / 2),
         y: startMenuYPos - fontSize,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
     }, fontSize + "px serif");
 
     shareMenu = new PartMenu("Share", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1) / 2),
+        x: startMenuXPos - ((cvs.width / menuButtonsCount + 1) / 2),
         y: startMenuYPos - fontSize,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
@@ -308,8 +149,8 @@ function createMenu() {
  * Используется для меню
  */
 function checkClick(e) {
-    var mousePosX = e.clientX;
-    var mousePosY = e.clientY;
+    const mousePosX = e.clientX;
+    const mousePosY = e.clientY;
 
     if (playMenu.move(mousePosX, mousePosY))
         play();
@@ -326,8 +167,8 @@ function checkClick(e) {
  * Используется для меню
  */
 function checkMove(e) {
-    var mousePosX = e.clientX;
-    var mousePosY = e.clientY;
+    const mousePosX = e.clientX;
+    const mousePosY = e.clientY;
 
     if (playMenu.move(mousePosX, mousePosY)) {
         //очистим экран
@@ -370,7 +211,7 @@ function play() {
 
     if (useGuiButtons) {
         //нопки для управления
-        var buttonSize = cvs.width / 7;
+        const buttonSize = cvs.width / 7;
 
         rectXPos = cvs.width * 0.05;
         rectYPos = cvs.height * 0.70;
@@ -400,10 +241,10 @@ function play() {
             h: buttonSize
         });
 
-	//для мыши    
+        //для мыши
         cvs.addEventListener('mousedown', checkPlayButtonDown, false);
         cvs.addEventListener('mouseup', checkPlayButtonUp, false);
-	//для экрана
+        //для экрана
         cvs.addEventListener('touchstart', checkPlayButtonDown, false);
         cvs.addEventListener('touchend', checkPlayButtonUp, false);
     }
@@ -494,8 +335,8 @@ function pause() {
  * Нажата кнопка мыши над кнопкой
  */
 function checkPlayButtonDown(e) {
-    var mousePosX = e.clientX;
-    var mousePosY = e.clientY;
+    const mousePosX = e.clientX;
+    const mousePosY = e.clientY;
 
     if (upButton.move(mousePosX, mousePosY)) {
         upPress = true;
@@ -518,8 +359,8 @@ function checkPlayButtonDown(e) {
  * Опущена кнопка мыши над кнопкой
  */
 function checkPlayButtonUp(e) {
-    var mousePosX = e.clientX;
-    var mousePosY = e.clientY;
+    const mousePosX = e.clientX;
+    const mousePosY = e.clientY;
 
     if (upButton.over(mousePosX, mousePosY)) {
         upPress = false;
@@ -570,17 +411,18 @@ function update() {
  * Отрисовка всего во время игры
  */
 function draw() {
-    //очистка холста от предыдущего кадра
+    let i;
+//очистка холста от предыдущего кадра
     clearCanvas();
 
-    for (var i = 0; i < backgrounds.length; i++) {
+    for (i = 0; i < backgrounds.length; i++) {
         drawBackground(backgrounds[i]);
     }
 
     drawPlayer(player);
 
-    for (var i = 0; i < entities.length; i++) {
-        drawEntity(entities[i], cvs.width, entities[i].y);
+    for (i = 0; i < entities.length; i++) {
+        drawEntity(entities[i]);
 
         // Отслеживание прикосновений
         if (player.x + (player.image.width * scale) >= entities[i].x
@@ -656,7 +498,7 @@ function drawPlayer(player) {
 /**
  * Отрисовка врагов
  */
-function drawEntity(entity, x, y) {
+function drawEntity(entity) {
     ctx.drawImage
     (
         entity.image,
