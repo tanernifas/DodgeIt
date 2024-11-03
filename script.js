@@ -216,25 +216,25 @@ function play() {
         rectXPos = cvs.width * 0.05;
         rectYPos = cvs.height * 0.70;
 
-        upButton = new GameButton("up", {
+        upButton = new GameButton({
             x: rectXPos + buttonSize,
             y: rectYPos,
             w: buttonSize,
             h: buttonSize
         });
-        downButton = new GameButton("down", {
+        downButton = new GameButton({
             x: rectXPos + buttonSize,
             y: rectYPos + buttonSize,
             w: buttonSize,
             h: buttonSize
         });
-        leftButton = new GameButton("left", {
+        leftButton = new GameButton({
             x: rectXPos,
             y: rectYPos + buttonSize,
             w: buttonSize,
             h: buttonSize
         });
-        rightButton = new GameButton("right", {
+        rightButton = new GameButton({
             x: rectXPos + 2 * buttonSize,
             y: rectYPos + buttonSize,
             w: buttonSize,
@@ -283,10 +283,10 @@ function clear() {
     cvs.removeEventListener('click', checkClick, false);
     cvs.removeEventListener('mousemove', checkMove, false);
     if (useGuiButtons) {
-    	cvs.addEventListener('mousedown', checkPlayButtonDown, false);
-    	cvs.addEventListener('mouseup', checkPlayButtonUp, false);
-    	cvs.addEventListener('touchstart', checkPlayButtonDown, false);
-    	cvs.addEventListener('touchend', checkPlayButtonUp, false);
+        cvs.addEventListener('mousedown', checkPlayButtonDown, false);
+        cvs.addEventListener('mouseup', checkPlayButtonUp, false);
+        cvs.addEventListener('touchstart', checkPlayButtonDown, false);
+        cvs.addEventListener('touchend', checkPlayButtonUp, false);
     }
 }
 
@@ -306,20 +306,20 @@ function stop() {
 
     //останавливаем
     clearInterval(timer);
-	timer = null;
+    timer = null;
 
-	//отключим игру
+    //отключим игру
     startGame = false;
 
     if (death) {
         ctx.font = "32px serif";
-	ctx.textAlign = "center";
+        ctx.textAlign = "center";
         ctx.strokeText("DEATH", cvs.width / 2, cvs.height / 2);
     }
 
-     if (win) {
+    if (win) {
         ctx.font = "32px serif";
-	ctx.textAlign = "center";
+        ctx.textAlign = "center";
         ctx.strokeText("HAPPY BIRTHDAY", cvs.width / 2, cvs.height / 2);
     }
 }
@@ -328,7 +328,13 @@ function stop() {
  * Пауза
  */
 function pause() {
-
+    if (startGame) {
+        startGame = false;
+        clearInterval(timer);
+    } else {
+        startGame = true;
+        timer = setInterval(update, UPDATE_TIME);
+    }
 }
 
 /**
@@ -366,7 +372,7 @@ function checkPlayButtonUp(e) {
         upPress = false;
     }
 
-        if (downButton.move(mousePosX, mousePosY)) {
+    if (downButton.move(mousePosX, mousePosY)) {
         downPress = false;
     }
 
@@ -395,15 +401,15 @@ function update() {
 
     move();
 
-        //экран смерти
+    //экран смерти
     if (health <= 0) {
-       death = true;
-       stop(); // Перезагрузка страницы
+        death = true;
+        stop(); // Перезагрузка страницы
     }
 
     if (score >= scoreToWin) {
-       win = true;
-       stop();
+        win = true;
+        stop();
     }
 }
 
@@ -426,19 +432,19 @@ function draw() {
 
         // Отслеживание прикосновений
         if (player.x + (player.image.width * scale) >= entities[i].x
-            && player.x <= entities[i].x + (entities[i].image.width  * entityScale)
+            && player.x <= entities[i].x + (entities[i].image.width * entityScale)
             && player.y <= entities[i].y + (entities[i].image.height * entityScale)
             && player.y + (player.image.height * scale) >= entities[i].y) {
 
             score++;
-	    levelScore++;
-	    if (levelScore >= 10) {
-		    levelScore = 0;
-		    backgroundSpeed += 0.5;
-	    }
+            levelScore++;
+            if (levelScore >= 10) {
+                levelScore = 0;
+                backgroundSpeed += 0.5;
+            }
 
             entities[i].x = cvs.width;
-            entities[i].y =  Math.floor(Math.random() * (cvs.height - (entities[i].image.height * entityScale)));
+            entities[i].y = Math.floor(Math.random() * (cvs.height - (entities[i].image.height * entityScale)));
         }
     }
 
@@ -447,7 +453,7 @@ function draw() {
     drawScore();
 
     if (useGuiButtons)
-    	drawGameButtons();
+        drawGameButtons();
 }
 
 /**
@@ -481,18 +487,18 @@ function drawBackground(background) {
  * Отрисовка персонажа
  */
 function drawPlayer(player) {
-	ctx.drawImage
-	(
-		player.image,
-		0,
-		0,
-		player.image.width,
-		player.image.height,
-		player.x,
-		player.y,
-		player.image.width * scale,
-		player.image.height * scale
-	);
+    ctx.drawImage
+    (
+        player.image,
+        0,
+        0,
+        player.image.width,
+        player.image.height,
+        player.x,
+        player.y,
+        player.image.width * scale,
+        player.image.height * scale
+    );
 }
 
 /**
@@ -518,7 +524,7 @@ function drawEntity(entity) {
     //если врага больше не видно (за границей экрана), выставляем его заново
     if (entity.x <= -entity.image.width * entityScale) {
         entity.x = cvs.width;
-        entity.y =  Math.floor(Math.random() * (cvs.height - (entity.image.height * entityScale)));
+        entity.y = Math.floor(Math.random() * (cvs.height - (entity.image.height * entityScale)));
         health--;
     }
 }
@@ -559,8 +565,7 @@ function drawGameButtons() {
  * Обработка событий по нажатию клавиш
  */
 function keyDownHandler(e) {
-    switch(e.keyCode)
-    {
+    switch (e.keyCode) {
         case 37: //Влево
             leftPress = true;
             break;
@@ -573,8 +578,8 @@ function keyDownHandler(e) {
         case 40: //Вниз
             downPress = true;
             break;
-
         case 27: //Esc
+            pause();
             break;
     }
 }
@@ -583,8 +588,7 @@ function keyDownHandler(e) {
  * Обработка событий по отпусканию клавиш
  */
 function keyUpHandler(e) {
-    switch(e.keyCode)
-    {
+    switch (e.keyCode) {
         case 37: //Влево
             leftPress = false;
             break;
@@ -597,7 +601,6 @@ function keyUpHandler(e) {
         case 40: //Вниз
             downPress = false;
             break;
-
         case 27: //Esc
             break;
     }
@@ -632,8 +635,7 @@ function move() {
 /**
  * Подстраиваемся под размер экрана
  */
-function resize()
-{
-	cvs.width = window.innerWidth;
-	cvs.height = window.innerHeight;
+function resize() {
+    cvs.width = window.innerWidth;
+    cvs.height = window.innerHeight;
 }

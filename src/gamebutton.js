@@ -3,7 +3,6 @@
  */
 class GameButton {
     constructor(text, rect) {
-        this.text = text;
         this.rect = rect;
     }
 
