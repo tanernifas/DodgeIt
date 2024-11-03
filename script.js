@@ -281,14 +281,14 @@ function createMenu() {
     }, fontSize + "px serif");
 
     recordsMenu = new PartMenu("Records", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1)) / 2),
+        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1) / 2),
         y: startMenuYPos - fontSize,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
     }, fontSize + "px serif");
 
     shareMenu = new PartMenu("Share", startMenuXPos, getStartMenuYPos(), {
-        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1)) / 2),
+        x: startMenuXPos - ((cvs.width /  menuButtonsCount + 1) / 2),
         y: startMenuYPos - fontSize,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
