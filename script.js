@@ -23,6 +23,9 @@ const cvs = document.getElementById("canvas");
 //получение контекста
 const ctx = cvs.getContext("2d");
 
+let player = null;
+let entities = null;
+
 //подстраиваем холст под размер экрана при запуске
 //делаем это перед инициализацией объектов сцены
 resize();
@@ -33,21 +36,22 @@ const backgrounds = [
     new Background("src/sprites/background.png", cvs.width)
 ];
 //игрок
-const player = new Player("src/sprites/car.png", cvs.width / 2, cvs.height / 2, true);
+player = new Player("src/sprites/car.png", cvs.width / 2, cvs.height / 2);
 //враги
-const entities = [
+entities = [
     new Entity("src/sprites/entity.png", cvs.width, 0)
 ];
 
 //коэффициент размера персонажа
-const scale = 1;
+let scale = 0;
 //скорость персонажа
 const speed = 5;
 //скорость подъема персонажа
 const upSpeed = 3;
 
 //коэффициент размера врагов
-const entityScale = 0.5;
+let entityScale = 0;
+
 //скорость фона/ стоячих врагов
 let backgroundSpeed = 4;
 
@@ -76,6 +80,10 @@ let downPress = false;
 window.addEventListener("resize", resize);
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
+window.addEventListener("load", new function () {
+    scale = player.image.width / (cvs.width / 6);
+    entityScale = entities[0].image.width / (cvs.width / 4);
+})
 
 createMenu();
 
@@ -94,7 +102,7 @@ function createMenu() {
     startGame = false;
 
     //размер шрифта
-    const fontSize = 48;
+    const fontSize = cvs.width / 25;
     ctx.font = fontSize + "px serif";
 
     //актуализация размеров экрана
@@ -116,24 +124,24 @@ function createMenu() {
 
     playMenu = new PartMenu("Play", startMenuXPos, getStartMenuYPos(), {
         x: startMenuXPos - ((cvs.width / menuButtonsCount + 1) / 2),
-        y: startMenuYPos - fontSize,
+        y: startMenuYPos - cvs.width / 25,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
-    }, fontSize + "px serif");
+    }, cvs.width / 25 + "px serif");
 
     recordsMenu = new PartMenu("Records", startMenuXPos, getStartMenuYPos(), {
         x: startMenuXPos - ((cvs.width / menuButtonsCount + 1) / 2),
-        y: startMenuYPos - fontSize,
+        y: startMenuYPos - cvs.width / 25,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
-    }, fontSize + "px serif");
+    }, cvs.width / 25 + "px serif");
 
     shareMenu = new PartMenu("Share", startMenuXPos, getStartMenuYPos(), {
         x: startMenuXPos - ((cvs.width / menuButtonsCount + 1) / 2),
         y: startMenuYPos - fontSize,
         w: cvs.width / menuButtonsCount + 1,
         h: cvs.height / (menuButtonsCount * 2)
-    }, fontSize + "px serif");
+    }, cvs.width / 25 + "px serif");
 
     //изначальная отрисовка меню
     playMenu.strokeText();
@@ -312,15 +320,15 @@ function stop() {
     startGame = false;
 
     if (death) {
-        ctx.font = "32px serif";
+        ctx.font = (cvs.width / 40) +"px serif";
         ctx.textAlign = "center";
         ctx.strokeText("DEATH", cvs.width / 2, cvs.height / 2);
     }
 
     if (win) {
-        ctx.font = "32px serif";
+        ctx.font = (cvs.width / 40) + "px serif";
         ctx.textAlign = "center";
-        ctx.strokeText("HAPPY BIRTHDAY", cvs.width / 2, cvs.height / 2);
+        ctx.strokeText("WIN", cvs.width / 2, cvs.height / 2);
     }
 }
 
@@ -331,6 +339,10 @@ function pause() {
     if (startGame) {
         startGame = false;
         clearInterval(timer);
+
+        ctx.textAlign = "center";
+        ctx.font = (cvs.width / 40) + "px serif";
+        ctx.strokeText("PAUSE", cvs.width / 2, cvs.height / 2);
     } else {
         startGame = true;
         timer = setInterval(update, UPDATE_TIME);
@@ -394,6 +406,9 @@ function checkPlayButtonUp(e) {
  * Главный метод (с него всё начинается)
  */
 function update() {
+    if (scale === 0)
+        return;
+
     backgrounds[0].update(backgrounds[1]);
     backgrounds[1].update(backgrounds[0]);
 
@@ -479,7 +494,7 @@ function drawBackground(background) {
         //ширина изображения на холсте
         cvs.width,
         //так как ширина и высота фона одинаковые, в качестве высоты указывается ширина
-        cvs.width
+        cvs.height
     );
 }
 
@@ -534,8 +549,8 @@ function drawEntity(entity) {
  */
 function drawHealth() {
     if (health > 0) {
-        ctx.font = "32px serif";
-        ctx.strokeText("HEALTH " + health, cvs.width * 0.15, 50);
+        ctx.font = (cvs.width / 50) + "px serif";
+        ctx.strokeText("HEALTH " + health, cvs.width * 0.10, cvs.width / 25);
     }
 }
 
@@ -544,8 +559,8 @@ function drawHealth() {
  */
 function drawScore() {
     if (health > 0) {
-        ctx.font = "32px serif";
-        ctx.strokeText("SCORE " + score, cvs.width * 0.85, 50);
+        ctx.font = (cvs.width / 50) + "px serif";
+        ctx.strokeText("SCORE " + score, cvs.width * 0.8, cvs.width / 25);
     }
 }
 
@@ -638,4 +653,9 @@ function move() {
 function resize() {
     cvs.width = window.innerWidth;
     cvs.height = window.innerHeight;
+
+    if (player != null && entities != null) {
+        scale = (cvs.width / 5) / player.image.width;
+        entityScale = (cvs.width / 6) / entities[0].image.width;
+    }
 }
