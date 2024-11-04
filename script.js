@@ -3,20 +3,8 @@ UPDATE_TIME = 1000 / 60;
 //таймер
 let timer = null;
 
-//запущена игра
-let startGame = false;
 //жизни
 let health = 5;
-//очки
-let score = 0;
-//очки для смены уровня
-let levelScore = 0;
-//количество очков для окончания игры
-const scoreToWin = 75;
-//смерть
-let death = false;
-//победа
-let win = false;
 
 //получение холста
 const cvs = document.getElementById("canvas");
@@ -85,6 +73,8 @@ window.addEventListener("load", new function () {
     entityScale = entities[0].image.width / (cvs.width / 4);
 })
 
+game = new Game();
+
 createMenu();
 
 ////////////////////////////////////////////////////////////////////////////
@@ -99,7 +89,7 @@ function createMenu() {
     const menuButtonsCount = 3;
 
     //запустим игру
-    startGame = false;
+    game.setStartGame(false);
 
     //размер шрифта
     const fontSize = cvs.width / 25;
@@ -215,7 +205,7 @@ function play() {
     resize();
 
     //запустим игру
-    startGame = true;
+    game.setStartGame(true);
 
     if (useGuiButtons) {
         //нопки для управления
@@ -267,7 +257,7 @@ function records() {
     clear();
 
     //отключим игру
-    startGame = false;
+    game.setStartGame(false);
 }
 
 /**
@@ -277,7 +267,7 @@ function share() {
     clear();
 
     //отключим игру
-    startGame = false;
+    game.setStartGame(false);
 }
 
 /**
@@ -317,15 +307,15 @@ function stop() {
     timer = null;
 
     //отключим игру
-    startGame = false;
+    game.setStartGame(false);
 
-    if (death) {
+    if (game.isDeath()) {
         ctx.font = (cvs.width / 40) +"px serif";
         ctx.textAlign = "center";
         ctx.strokeText("DEATH", cvs.width / 2, cvs.height / 2);
     }
 
-    if (win) {
+    if (game.isWin()) {
         ctx.font = (cvs.width / 40) + "px serif";
         ctx.textAlign = "center";
         ctx.strokeText("WIN", cvs.width / 2, cvs.height / 2);
@@ -336,15 +326,15 @@ function stop() {
  * Пауза
  */
 function pause() {
-    if (startGame) {
-        startGame = false;
+    if (game.isStartGame()) {
+        game.setStartGame(false);
         clearInterval(timer);
 
         ctx.textAlign = "center";
         ctx.font = (cvs.width / 40) + "px serif";
         ctx.strokeText("PAUSE", cvs.width / 2, cvs.height / 2);
     } else {
-        startGame = true;
+        game.setStartGame(true);
         timer = setInterval(update, UPDATE_TIME);
     }
 }
@@ -418,12 +408,12 @@ function update() {
 
     //экран смерти
     if (health <= 0) {
-        death = true;
+        game.setDeath(true);
         stop(); // Перезагрузка страницы
     }
 
-    if (score >= scoreToWin) {
-        win = true;
+    if (game.getScore() >= game.getScoreToWin()) {
+        game.setWin(true);
         stop();
     }
 }
@@ -451,10 +441,10 @@ function draw() {
             && player.y <= entities[i].y + (entities[i].image.height * entityScale)
             && player.y + (player.image.height * scale) >= entities[i].y) {
 
-            score++;
-            levelScore++;
-            if (levelScore >= 10) {
-                levelScore = 0;
+            game.setScore(game.getScore() + 1);
+            game.setLevelScore(game.getLevelScore() + 1);
+            if (game.getLevelScore >= 10) {
+                game.setLevelScore(0);
                 backgroundSpeed += 0.5;
             }
 
@@ -560,7 +550,7 @@ function drawHealth() {
 function drawScore() {
     if (health > 0) {
         ctx.font = (cvs.width / 50) + "px serif";
-        ctx.strokeText("SCORE " + score, cvs.width * 0.8, cvs.width / 25);
+        ctx.strokeText("SCORE " + game.getScore(), cvs.width * 0.8, cvs.width / 25);
     }
 }
 
