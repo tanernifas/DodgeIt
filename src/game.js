@@ -7,10 +7,6 @@ class Game {
     levelScore = 0;
     //количество очков для окончания игры
     scoreToWin = 75;
-    //смерть
-    death = false;
-    //победа
-    win = false;
 
     constructor() {
     }
@@ -45,21 +41,5 @@ class Game {
 
     setScoreToWin(value) {
         this.scoreToWin = value;
-    }
-
-    isDeath() {
-        return this.death;
-    }
-
-    setDeath(value) {
-        this.death = value;
-    }
-
-    isWin() {
-        return this.win;
-    }
-
-    setWin(value) {
-        this.win = value;
     }
 }

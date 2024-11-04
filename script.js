@@ -3,9 +3,6 @@ UPDATE_TIME = 1000 / 60;
 //таймер
 let timer = null;
 
-//жизни
-let health = 5;
-
 //получение холста
 const cvs = document.getElementById("canvas");
 //получение контекста
@@ -29,16 +26,6 @@ player = new Player("src/sprites/car.png", cvs.width / 2, cvs.height / 2);
 entities = [
     new Entity("src/sprites/entity.png", cvs.width, 0)
 ];
-
-//коэффициент размера персонажа
-let scale = 0;
-//скорость персонажа
-const speed = 5;
-//скорость подъема персонажа
-const upSpeed = 3;
-
-//коэффициент размера врагов
-let entityScale = 0;
 
 //скорость фона/ стоячих врагов
 let backgroundSpeed = 4;
@@ -69,8 +56,15 @@ window.addEventListener("resize", resize);
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
 window.addEventListener("load", new function () {
-    scale = player.image.width / (cvs.width / 6);
-    entityScale = entities[0].image.width / (cvs.width / 4);
+    player.setScale(player.image.width / (cvs.width / 6));
+
+    let entity;
+    if (entities.length !== 0) {
+        for (let i = 0; i < entities.length; i++) {
+            entity = entities[i];
+            entity.setEntityScale(entity.image.width / (cvs.width / 4))
+        }
+    }
 })
 
 game = new Game();
@@ -309,13 +303,13 @@ function stop() {
     //отключим игру
     game.setStartGame(false);
 
-    if (game.isDeath()) {
+    if (player.isDeath()) {
         ctx.font = (cvs.width / 40) +"px serif";
         ctx.textAlign = "center";
         ctx.strokeText("DEATH", cvs.width / 2, cvs.height / 2);
     }
 
-    if (game.isWin()) {
+    if (player.isWin()) {
         ctx.font = (cvs.width / 40) + "px serif";
         ctx.textAlign = "center";
         ctx.strokeText("WIN", cvs.width / 2, cvs.height / 2);
@@ -396,7 +390,7 @@ function checkPlayButtonUp(e) {
  * Главный метод (с него всё начинается)
  */
 function update() {
-    if (scale === 0)
+    if (player.getScale() === 0)
         return;
 
     backgrounds[0].update(backgrounds[1]);
@@ -407,13 +401,13 @@ function update() {
     move();
 
     //экран смерти
-    if (health <= 0) {
-        game.setDeath(true);
+    if (player.getHealth() <= 0) {
+        player.setDeath(true);
         stop(); // Перезагрузка страницы
     }
 
     if (game.getScore() >= game.getScoreToWin()) {
-        game.setWin(true);
+        player.setWin(true);
         stop();
     }
 }
@@ -432,14 +426,17 @@ function draw() {
 
     drawPlayer(player);
 
+    let entity;
     for (i = 0; i < entities.length; i++) {
-        drawEntity(entities[i]);
+        entity = entities[i];
+
+        drawEntity(entity);
 
         // Отслеживание прикосновений
-        if (player.x + (player.image.width * scale) >= entities[i].x
-            && player.x <= entities[i].x + (entities[i].image.width * entityScale)
-            && player.y <= entities[i].y + (entities[i].image.height * entityScale)
-            && player.y + (player.image.height * scale) >= entities[i].y) {
+        if (player.x + (player.image.width * player.getScale()) >= entities[i].x
+            && player.x <= entity.x + (entities[i].image.width * entity.getEntityScale())
+            && player.y <= entity.y + (entities[i].image.height * entity.getEntityScale())
+            && player.y + (player.image.height * player.getScale()) >= entities[i].y) {
 
             game.setScore(game.getScore() + 1);
             game.setLevelScore(game.getLevelScore() + 1);
@@ -448,8 +445,8 @@ function draw() {
                 backgroundSpeed += 0.5;
             }
 
-            entities[i].x = cvs.width;
-            entities[i].y = Math.floor(Math.random() * (cvs.height - (entities[i].image.height * entityScale)));
+            entity.x = cvs.width;
+            entity.y = Math.floor(Math.random() * (cvs.height - (entities[i].image.height * entity.getEntityScale())));
         }
     }
 
@@ -501,8 +498,8 @@ function drawPlayer(player) {
         player.image.height,
         player.x,
         player.y,
-        player.image.width * scale,
-        player.image.height * scale
+        player.image.width * player.getScale(),
+        player.image.height * player.getScale()
     );
 }
 
@@ -519,18 +516,18 @@ function drawEntity(entity) {
         entity.image.height,
         entity.x,
         entity.y,
-        entity.image.width * entityScale,
-        entity.image.height * entityScale
+        entity.image.width * entity.getEntityScale(),
+        entity.image.height * entity.getEntityScale()
     );
 
     //постройки двигаются синхронно с фоном
     entity.x = entity.x - backgroundSpeed;
 
     //если врага больше не видно (за границей экрана), выставляем его заново
-    if (entity.x <= -entity.image.width * entityScale) {
+    if (entity.x <= -entity.image.width * entity.getEntityScale()) {
         entity.x = cvs.width;
-        entity.y = Math.floor(Math.random() * (cvs.height - (entity.image.height * entityScale)));
-        health--;
+        entity.y = Math.floor(Math.random() * (cvs.height - (entity.image.height * entity.getEntityScale())));
+        player.setHealth(player.getHealth() - 1);
     }
 }
 
@@ -538,9 +535,9 @@ function drawEntity(entity) {
  * Отрисовка жизней
  */
 function drawHealth() {
-    if (health > 0) {
+    if (player.getHealth() > 0) {
         ctx.font = (cvs.width / 50) + "px serif";
-        ctx.strokeText("HEALTH " + health, cvs.width * 0.10, cvs.width / 25);
+        ctx.strokeText("HEALTH " + player.getHealth(), cvs.width * 0.10, cvs.width / 25);
     }
 }
 
@@ -548,7 +545,7 @@ function drawHealth() {
  * Отрисовка жизней
  */
 function drawScore() {
-    if (health > 0) {
+    if (player.getHealth() > 0) {
         ctx.font = (cvs.width / 50) + "px serif";
         ctx.strokeText("SCORE " + game.getScore(), cvs.width * 0.8, cvs.width / 25);
     }
@@ -617,19 +614,19 @@ function keyUpHandler(e) {
  */
 function move() {
     if (leftPress) {
-        player.move("x", -speed);
+        player.move("x", -player.getSpeed());
     }
 
     if (rightPress) {
-        player.move("x", +speed);
+        player.move("x", +player.getSpeed());
     }
 
     if (upPress) {
-        player.move("y", -upSpeed);
+        player.move("y", -player.getUpSpeed());
     }
 
     if (downPress) {
-        player.move("y", +upSpeed);
+        player.move("y", +player.getUpSpeed());
     }
 }
 
@@ -645,7 +642,14 @@ function resize() {
     cvs.height = window.innerHeight;
 
     if (player != null && entities != null) {
-        scale = (cvs.width / 5) / player.image.width;
-        entityScale = (cvs.width / 6) / entities[0].image.width;
+        player.setScale(player.image.width / (cvs.width / 6));
+
+        let entity;
+        if (entities.length !== 0) {
+            for (let i = 0; i < entities.length; i++) {
+                entity = entities[i];
+                entity.setEntityScale(entity.image.width / (cvs.width / 4))
+            }
+        }
     }
 }

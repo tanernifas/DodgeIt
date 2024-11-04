@@ -2,6 +2,19 @@
  * Персонаж
  */
 class Player {
+    //жизни
+    health = 5;
+    //смерть
+    death = false;
+    //победа
+    win = false;
+    //коэффициент размера персонажа
+    scale = 0;
+    //скорость персонажа
+    speed = 5;
+    //скорость подъема персонажа
+    upSpeed = 3;
+
     constructor(imageUrl, x, y) {
         this.x = x;
         this.y = y;
@@ -19,7 +32,7 @@ class Player {
             this.y += d; //смещение
 
             //если при смещении объект выходит за края холста, то изменения откатываются
-            if (this.y + this.image.height * scale > cvs.height) {
+            if (this.y + this.image.height * this.scale > cvs.height) {
                 this.y -= d;
             }
 
@@ -29,7 +42,7 @@ class Player {
         } else {//перемещение по оси x
             this.x += d;
 
-            if (this.x + this.image.width * scale > cvs.width) {
+            if (this.x + this.image.width * this.scale > cvs.width) {
                 this.x -= d;
             }
 
@@ -37,5 +50,53 @@ class Player {
                 this.x = 0;
             }
         }
+    }
+
+    getHealth() {
+        return this.health;
+    }
+
+    setHealth(value) {
+        this.health = value;
+    }
+
+    isDeath() {
+        return this.death;
+    }
+
+    setDeath(value) {
+        this.death = value;
+    }
+
+    isWin() {
+        return this.win;
+    }
+
+    setWin(value) {
+        this.win = value;
+    }
+
+    getScale() {
+        return this.scale;
+    }
+
+    setScale(value) {
+        this.scale = value;
+    }
+
+    getSpeed() {
+        return this.speed;
+    }
+
+    setSpeed(value) {
+        this.speed = value;
+    }
+
+    getUpSpeed() {
+        return this.upSpeed;
+    }
+
+    setUpSpeed(value) {
+        this.upSpeed = value;
     }
 }
