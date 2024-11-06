@@ -2,6 +2,9 @@
  * Фон
  */
 class Background {
+    //скорость фона/ стоячих врагов
+    backgroundSpeed = 4;
+    
     constructor(imageUrl, shift) {
         this.x = shift;
         this.y = 0;
@@ -23,4 +26,11 @@ class Background {
             this.x = background.x + cvs.width - backgroundSpeed;
         }
     }
+
+    getBackgroundSpeed() {
+        return this.backgroundSpeed;
+    }
+
+    setBackgroundSpeed(value) {
+        this.backgroundSpeed = value;
 }
