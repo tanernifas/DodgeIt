@@ -27,9 +27,6 @@ entities = [
     new Entity("src/sprites/entity.png", cvs.width, 0)
 ];
 
-//скорость фона/ стоячих врагов
-let backgroundSpeed = 4;
-
 //использовать кнопки графического интерфейса для управления
 const useGuiButtons = false;
 
@@ -420,7 +417,12 @@ function draw() {
 //очистка холста от предыдущего кадра
     clearCanvas();
 
+    let backgroundSpeed = 0;
+    
     for (i = 0; i < backgrounds.length; i++) {
+        if (backgroundSpeed !== 0)
+            backgroundSpeed = backgrounds.getBackgroundSpeed();
+        
         drawBackground(backgrounds[i]);
     }
 
