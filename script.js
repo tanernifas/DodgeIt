@@ -27,50 +27,19 @@ entities = [
     new Entity("src/sprites/entity.png", cvs.width, 0)
 ];
 
-//использовать кнопки графического интерфейса для управления
-const useGuiButtons = false;
-
 //меню
 let playMenu;
 let recordsMenu;
 let shareMenu;
 
-//ui-кнопки
-let rectXPos;
-let rectYPos;
-let upButton;
-let downButton;
-let leftButton;
-let rightButton;
-
-//переменные для определения нажатых кнопок
-let leftPress = false;
-let rightPress = false;
-let upPress = false;
-let downPress = false;
-
-window.addEventListener("resize", resize);
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
-window.addEventListener("load", new function () {
-    player.setScale(player.image.width / (cvs.width / 6));
-
-    let entity;
-    if (entities.length !== 0) {
-        for (let i = 0; i < entities.length; i++) {
-            entity = entities[i];
-            entity.setEntityScale(entity.image.width / (cvs.width / 4))
-        }
-    }
-})
+window.addEventListener("resize", resize);
+window.addEventListener("load", setActualScale);
 
 game = new Game();
 
 createMenu();
-
-////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////MENU///////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 
 /**
  * Создание меню
@@ -188,6 +157,51 @@ function checkMove(e) {
 }
 
 /**
+ * Обработка событий по нажатию клавиш
+ */
+function keyDownHandler(e) {
+    switch (e.keyCode) {
+        case 37: //Влево
+            player.getInputHandler().setLeftPress(true);
+            break;
+        case 39: //Вправо
+            player.getInputHandler().setRightPress(true);
+            break;
+        case 38: //Вверх
+            player.getInputHandler().setUpPress(true);
+            break;
+        case 40: //Вниз
+            player.getInputHandler().setDownPress(true);
+            break;
+        case 27: //Esc
+            pause();
+            break;
+    }
+}
+
+/**
+ * Обработка событий по отпусканию клавиш
+ */
+function keyUpHandler(e) {
+    switch (e.keyCode) {
+        case 37: //Влево
+            player.getInputHandler().setLeftPress(false);
+            break;
+        case 39: //Вправо
+            player.getInputHandler().setRightPress(false);
+            break;
+        case 38: //Вверх
+            player.getInputHandler().setUpPress(false);
+            break;
+        case 40: //Вниз
+            player.getInputHandler().setDownPress(false);
+            break;
+        case 27: //Esc
+            break;
+    }
+}
+
+/**
  * Запуск игры
  */
 function play() {
@@ -197,46 +211,6 @@ function play() {
 
     //запустим игру
     game.setStartGame(true);
-
-    if (useGuiButtons) {
-        //нопки для управления
-        const buttonSize = cvs.width / 7;
-
-        rectXPos = cvs.width * 0.05;
-        rectYPos = cvs.height * 0.70;
-
-        upButton = new GameButton({
-            x: rectXPos + buttonSize,
-            y: rectYPos,
-            w: buttonSize,
-            h: buttonSize
-        });
-        downButton = new GameButton({
-            x: rectXPos + buttonSize,
-            y: rectYPos + buttonSize,
-            w: buttonSize,
-            h: buttonSize
-        });
-        leftButton = new GameButton({
-            x: rectXPos,
-            y: rectYPos + buttonSize,
-            w: buttonSize,
-            h: buttonSize
-        });
-        rightButton = new GameButton({
-            x: rectXPos + 2 * buttonSize,
-            y: rectYPos + buttonSize,
-            w: buttonSize,
-            h: buttonSize
-        });
-
-        //для мыши
-        cvs.addEventListener('mousedown', checkPlayButtonDown, false);
-        cvs.addEventListener('mouseup', checkPlayButtonUp, false);
-        //для экрана
-        cvs.addEventListener('touchstart', checkPlayButtonDown, false);
-        cvs.addEventListener('touchend', checkPlayButtonUp, false);
-    }
 
     timer = setInterval(update, UPDATE_TIME);
 }
@@ -271,12 +245,6 @@ function clear() {
     //удалим листенеры
     cvs.removeEventListener('click', checkClick, false);
     cvs.removeEventListener('mousemove', checkMove, false);
-    if (useGuiButtons) {
-        cvs.addEventListener('mousedown', checkPlayButtonDown, false);
-        cvs.addEventListener('mouseup', checkPlayButtonUp, false);
-        cvs.addEventListener('touchstart', checkPlayButtonDown, false);
-        cvs.addEventListener('touchend', checkPlayButtonUp, false);
-    }
 }
 
 /**
@@ -331,58 +299,6 @@ function pause() {
 }
 
 /**
- * Нажата кнопка мыши над кнопкой
- */
-function checkPlayButtonDown(e) {
-    const mousePosX = e.clientX;
-    const mousePosY = e.clientY;
-
-    if (upButton.move(mousePosX, mousePosY)) {
-        upPress = true;
-    }
-
-    if (downButton.move(mousePosX, mousePosY)) {
-        downPress = true;
-    }
-
-    if (leftButton.move(mousePosX, mousePosY)) {
-        leftPress = true;
-    }
-
-    if (rightButton.move(mousePosX, mousePosY)) {
-        rightPress = true;
-    }
-}
-
-/**
- * Опущена кнопка мыши над кнопкой
- */
-function checkPlayButtonUp(e) {
-    const mousePosX = e.clientX;
-    const mousePosY = e.clientY;
-
-    if (upButton.over(mousePosX, mousePosY)) {
-        upPress = false;
-    }
-
-    if (downButton.move(mousePosX, mousePosY)) {
-        downPress = false;
-    }
-
-    if (leftButton.move(mousePosX, mousePosY)) {
-        leftPress = false
-    }
-
-    if (rightButton.move(mousePosX, mousePosY)) {
-        rightPress = false;
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////GAME_LOGIC/////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-/**
  * Обновление кадра
  * Главный метод (с него всё начинается)
  */
@@ -395,7 +311,7 @@ function update() {
 
     draw();
 
-    move();
+    player.getInputHandler().move();
 
     //экран смерти
     if (player.getHealth() <= 0) {
@@ -417,13 +333,14 @@ function draw() {
 //очистка холста от предыдущего кадра
     clearCanvas();
 
-    let backgroundSpeed = 0;
-    
+    let background;
     for (i = 0; i < backgrounds.length; i++) {
-        if (backgroundSpeed !== 0)
-            backgroundSpeed = backgrounds.getBackgroundSpeed();
-        
-        drawBackground(backgrounds[i]);
+        background = backgrounds[i];
+        drawBackground(background);
+
+        if (game.getLevelScore >= 10) {
+            background.setSpeed(background.getSpeed() + 0.5);
+        }
     }
 
     drawPlayer(player);
@@ -444,7 +361,7 @@ function draw() {
             game.setLevelScore(game.getLevelScore() + 1);
             if (game.getLevelScore >= 10) {
                 game.setLevelScore(0);
-                backgroundSpeed += 0.5;
+                entity.setEntityScale(entity.getEntityScale() + 0.5);
             }
 
             entity.x = cvs.width;
@@ -452,12 +369,7 @@ function draw() {
         }
     }
 
-    drawHealth();
-
-    drawScore();
-
-    if (useGuiButtons)
-        drawGameButtons();
+    drawUi();
 }
 
 /**
@@ -523,7 +435,7 @@ function drawEntity(entity) {
     );
 
     //постройки двигаются синхронно с фоном
-    entity.x = entity.x - backgroundSpeed;
+    entity.x = entity.x - entity.getSpeed();
 
     //если врага больше не видно (за границей экрана), выставляем его заново
     if (entity.x <= -entity.image.width * entity.getEntityScale()) {
@@ -531,6 +443,14 @@ function drawEntity(entity) {
         entity.y = Math.floor(Math.random() * (cvs.height - (entity.image.height * entity.getEntityScale())));
         player.setHealth(player.getHealth() - 1);
     }
+}
+
+/**
+ * Отрисовка UI
+ */
+function drawUi() {
+    drawHealth();
+    drawScore();
 }
 
 /**
@@ -554,95 +474,16 @@ function drawScore() {
 }
 
 /**
- * Отрисовка кнопок
- */
-function drawGameButtons() {
-    ctx.rect(upButton.rect.x, upButton.rect.y, upButton.rect.w, upButton.rect.h);
-    ctx.rect(downButton.rect.x, downButton.rect.y, downButton.rect.w, downButton.rect.h);
-    ctx.rect(leftButton.rect.x, leftButton.rect.y, leftButton.rect.w, leftButton.rect.h);
-    ctx.rect(rightButton.rect.x, rightButton.rect.y, rightButton.rect.w, rightButton.rect.h);
-
-    ctx.stroke();
-}
-
-/**
- * Обработка событий по нажатию клавиш
- */
-function keyDownHandler(e) {
-    switch (e.keyCode) {
-        case 37: //Влево
-            leftPress = true;
-            break;
-        case 39: //Вправо
-            rightPress = true;
-            break;
-        case 38: //Вверх
-            upPress = true;
-            break;
-        case 40: //Вниз
-            downPress = true;
-            break;
-        case 27: //Esc
-            pause();
-            break;
-    }
-}
-
-/**
- * Обработка событий по отпусканию клавиш
- */
-function keyUpHandler(e) {
-    switch (e.keyCode) {
-        case 37: //Влево
-            leftPress = false;
-            break;
-        case 39: //Вправо
-            rightPress = false;
-            break;
-        case 38: //Вверх
-            upPress = false;
-            break;
-        case 40: //Вниз
-            downPress = false;
-            break;
-        case 27: //Esc
-            break;
-    }
-}
-
-/**
- * Движения персонажа
- * На основе нажатых кнопок
- */
-function move() {
-    if (leftPress) {
-        player.move("x", -player.getSpeed());
-    }
-
-    if (rightPress) {
-        player.move("x", +player.getSpeed());
-    }
-
-    if (upPress) {
-        player.move("y", -player.getUpSpeed());
-    }
-
-    if (downPress) {
-        player.move("y", +player.getUpSpeed());
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////OTHER///////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-/**
  * Подстраиваемся под размер экрана
  */
 function resize() {
     cvs.width = window.innerWidth;
     cvs.height = window.innerHeight;
 
+    setActualScale();
+}
+
+function setActualScale() {
     if (player != null && entities != null) {
         player.setScale(player.image.width / (cvs.width / 6));
 

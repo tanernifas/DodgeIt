@@ -2,6 +2,9 @@
  * Противник
  */
 class Entity {
+
+    //скорость стоячих объектов(при уменьшении движется вправо, иначе влево)
+    speed = 4;
     //коэффициент размера врагов
     entityScale = 0;
 
@@ -19,5 +22,13 @@ class Entity {
 
     setEntityScale(value) {
         this.entityScale = value;
+    }
+
+    getSpeed() {
+        return this.speed;
+    }
+
+    setSpeed(value) {
+        this.speed = value;
     }
 }

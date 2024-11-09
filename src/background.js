@@ -2,8 +2,9 @@
  * Фон
  */
 class Background {
-    //скорость фона/ стоячих врагов
-    backgroundSpeed = 4;
+
+    //скорость фона
+    speed = 4;
     
     constructor(imageUrl, shift) {
         this.x = shift;
@@ -18,19 +19,20 @@ class Background {
      */
     update(background) {
         //при обновлении изображение смещаем на скорость
-        this.x -= backgroundSpeed;
+        this.x -= this.speed;
 
         //если изображение ушло за край холста, то меняем положение
         if (this.x < -cvs.width) {
             //новое положение указывается с учётом второго фона
-            this.x = background.x + cvs.width - backgroundSpeed;
+            this.x = background.x + cvs.width - this.speed;
         }
     }
 
-    getBackgroundSpeed() {
-        return this.backgroundSpeed;
+    getSpeed() {
+        return this.speed;
     }
 
-    setBackgroundSpeed(value) {
-        this.backgroundSpeed = value;
+    setSpeed(value) {
+        this.speed = value;
+    }
 }

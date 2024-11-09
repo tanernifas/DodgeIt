@@ -15,12 +15,15 @@ class Player {
     //скорость подъема персонажа
     upSpeed = 3;
 
-    constructor(imageUrl, x, y) {
+    constructor(imageUrl, x, y, inputHandler) {
         this.x = x;
         this.y = y;
 
         this.image = new Image();
         this.image.src = imageUrl;
+
+        inputHandler = new InputHandler(this);
+        this.inputHandler = inputHandler;
     }
 
     /**
@@ -98,5 +101,13 @@ class Player {
 
     setUpSpeed(value) {
         this.upSpeed = value;
+    }
+
+    getInputHandler() {
+        return this.inputHandler;
+    }
+
+    setInputHandler(value) {
+        this.inputHandler = value;
     }
 }
