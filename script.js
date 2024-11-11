@@ -483,15 +483,27 @@ function resize() {
     setActualScale();
 }
 
+/**
+ * Устанавливаем актуальный коэффициент
+ */
 function setActualScale() {
     if (player != null && entities != null) {
-        player.setScale(player.image.width / (cvs.width / 6));
+        let currentWidth = cvs.width / 6;
+        if (currentWidth >= player.image.width)
+            player.setScale(player.image.width / (currentWidth));
+        else
+            player.setScale(0.8 * currentWidth);
 
         let entity;
         if (entities.length !== 0) {
             for (let i = 0; i < entities.length; i++) {
                 entity = entities[i];
-                entity.setEntityScale(entity.image.width / (cvs.width / 4))
+
+                let currentWidth = cvs.width / 4;
+                if (currentWidth >= entity.image.width)
+                    entity.setEntityScale(entity.image.width / (cvs.width / 4))
+                else
+                    entity.setEntityScale(0.8 * currentWidth);
             }
         }
     }
