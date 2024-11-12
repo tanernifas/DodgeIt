@@ -489,6 +489,8 @@ function resize() {
 function setActualScale() {
     if (player != null && entities != null) {
         player.setScale(cvs.width / 7.5 / player.image.width);
+        //корректируем скорость относительно размера экрана
+        player.setSpeed(2.9 + (1920 / cvs.width) * 0.1);
 
         let entity;
         if (entities.length !== 0) {
