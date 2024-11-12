@@ -488,22 +488,14 @@ function resize() {
  */
 function setActualScale() {
     if (player != null && entities != null) {
-        let currentWidth = cvs.width / 6;
-        if (currentWidth >= player.image.width)
-            player.setScale(player.image.width / (currentWidth));
-        else
-            player.setScale(0.8 * currentWidth);
+        player.setScale(cvs.width / 7.5 / player.image.width);
 
         let entity;
         if (entities.length !== 0) {
             for (let i = 0; i < entities.length; i++) {
                 entity = entities[i];
 
-                let currentWidth = cvs.width / 4;
-                if (currentWidth >= entity.image.width)
-                    entity.setEntityScale(entity.image.width / (cvs.width / 4))
-                else
-                    entity.setEntityScale(0.8 * currentWidth);
+                entity.setEntityScale(cvs.width / 6 / entity.image.width);
             }
         }
     }
